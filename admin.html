@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الإدارة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .enabled {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .disabled {
+            background-color: #f44336;
+            color: white;
+        }
+        .change-password-section {
+            margin-top: 30px;
+        }
+        input[type="password"] {
+            padding: 10px;
+            margin: 5px;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>لوحة تحكم الإدارة</h1>
+        
+        <!-- عرض حالة إضافة الملاحظات -->
+        <div class="status" id="addNotesStatus">
+            <strong>إضافة الملاحظات:</strong> <span id="addNotesText">غير فعال</span>
+        </div>
+
+        <!-- عرض حالة رفع الصور -->
+        <div class="status" id="imageUploadStatus">
+            <strong>رفع الصور:</strong> <span id="imageUploadText">غير فعال</span>
+        </div>
+
+        <button id="toggleAddNotes">تفعيل إضافة الملاحظات</button>
+        <button id="toggleImageUpload">تفعيل رفع الصور</button>
+
+        <!-- قسم تغيير كلمة المرور -->
+        <div class="change-password-section">
+            <h2>تغيير كلمة المرور</h2>
+            <label for="oldPassword">كلمة المرور القديمة:</label>
+            <input type="password" id="oldPassword" placeholder="أدخل كلمة المرور القديمة">
+            <br>
+            <label for="newPassword">كلمة المرور الجديدة:</label>
+            <input type="password" id="newPassword" placeholder="أدخل كلمة المرور الجديدة">
+            <br>
+            <button id="changePasswordBtn">تغيير كلمة المرور</button>
+            <p id="passwordChangeStatus"></p>
+        </div>
+    </div>
+
+    <script>
+        // تحقق من كلمة المرور قبل الوصول إلى الصفحة
+        function checkAdminPassword() {
+            const correctPassword = localStorage.getItem('adminPassword') || "Ahmed*123"; // استخدام كلمة مرور من التخزين المحلي
+            const userPassword = prompt("أدخل كلمة المرور للوصول إلى لوحة التحكم:");
+
+            if (userPassword !== correctPassword) {
+                alert("كلمة المرور غير صحيحة!");
+                window.location.href = "index.html"; // إعادة توجيه إلى الصفحة الرئيسية
+            }
+        }
+
+        // تحميل الإعدادات الحالية
+        function loadSettings() {
+            const canAddNotes = localStorage.getItem('canAddNotes') === 'true';
+            const allowImages = localStorage.getItem('allowImages') === 'true';
+
+            // تحديث حالة إضافة الملاحظات
+            const addNotesStatus = document.getElementById('addNotesStatus');
+            const addNotesText = document.getElementById('addNotesText');
+            if (canAddNotes) {
+                addNotesStatus.classList.add('enabled');
+                addNotesStatus.classList.remove('disabled');
+                addNotesText.textContent = 'فعال';
+            } else {
+                addNotesStatus.classList.add('disabled');
+                addNotesStatus.classList.remove('enabled');
+                addNotesText.textContent = 'غير فعال';
+            }
+
+            // تحديث حالة رفع الصور
+            const imageUploadStatus = document.getElementById('imageUploadStatus');
+            const imageUploadText = document.getElementById('imageUploadText');
+            if (allowImages) {
+                imageUploadStatus.classList.add('enabled');
+                imageUploadStatus.classList.remove('disabled');
+                imageUploadText.textContent = 'فعال';
+            } else {
+                imageUploadStatus.classList.add('disabled');
+                imageUploadStatus.classList.remove('enabled');
+                imageUploadText.textContent = 'غير فعال';
+            }
+        }
+
+        // تفعيل أو تعطيل إضافة الملاحظات
+        document.getElementById('toggleAddNotes').addEventListener('click', function() {
+            let canAddNotes = localStorage.getItem('canAddNotes') === 'true';
+            canAddNotes = !canAddNotes;
+            localStorage.setItem('canAddNotes', canAddNotes);
+            loadSettings(); // إعادة تحميل الإعدادات
+        });
+
+        // تفعيل أو تعطيل رفع الصور
+        document.getElementById('toggleImageUpload').addEventListener('click', function() {
+            let allowImages = localStorage.getItem('allowImages') === 'true';
+            allowImages = !allowImages;
+            localStorage.setItem('allowImages', allowImages);
+            loadSettings(); // إعادة تحميل الإعدادات
+        });
+
+        // تغيير كلمة المرور
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            const currentPassword = localStorage.getItem('adminPassword') || "Ahmed*123"; // الحصول على كلمة المرور الحالية من التخزين المحلي
+
+            if (oldPassword !== currentPassword) {
+                document.getElementById('passwordChangeStatus').textContent = "كلمة المرور القديمة غير صحيحة!";
+                document.getElementById('passwordChangeStatus').style.color = "red";
+            } else if (newPassword.length < 6) {
+                document.getElementById('passwordChangeStatus').textContent = "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل!";
+                document.getElementById('passwordChangeStatus').style.color = "red";
+            } else {
+                localStorage.setItem('adminPassword', newPassword); // تخزين كلمة المرور الجديدة في التخزين المحلي
+                document.getElementById('passwordChangeStatus').textContent = "تم تغيير كلمة المرور بنجاح!";
+                document.getElementById('passwordChangeStatus').style.color = "green";
+            }
+        });
+
+        // تحميل الإعدادات عند بداية تحميل الصفحة
+        window.onload = function() {
+            checkAdminPassword(); // التحقق من كلمة المرور عند تحميل الصفحة
+            loadSettings(); // تحميل الإعدادات
+        };
+    </script>
+</body>
+</html>
